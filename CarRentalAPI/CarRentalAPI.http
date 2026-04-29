@@ -1,0 +1,40 @@
+@CarRentalAPI_HostAddress = http://localhost:5124
+
+### Get all cars
+GET {{CarRentalAPI_HostAddress}}/api/cars
+Accept: application/json
+
+###
+
+### Get car by id (replace {id} with a real id)
+GET {{CarRentalAPI_HostAddress}}/api/cars/{id}
+Accept: application/json
+
+###
+
+### Create a new car
+POST {{CarRentalAPI_HostAddress}}/api/cars
+Content-Type: application/json
+
+{
+  "model": "Toyota Corolla",
+  "year": "2022"
+}
+
+###
+
+### Update a car (replace {id} with a real id)
+PUT {{CarRentalAPI_HostAddress}}/api/cars/{id}
+Content-Type: application/json
+
+{
+  "model": "Honda Civic",
+  "year": "2023"
+}
+
+###
+
+### Delete a car (replace {id} with a real id)
+DELETE {{CarRentalAPI_HostAddress}}/api/cars/{id}
+
+###
