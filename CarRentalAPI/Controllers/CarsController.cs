@@ -8,23 +8,30 @@ namespace CarRentalAPI.Controllers;
 public class CarsController : ControllerBase
 {
     private static readonly List<Car> _cars = new();
+    private static readonly object _lock = new();
 
     // GET api/cars
     [HttpGet]
     public ActionResult<IEnumerable<Car>> GetAll()
     {
-        return Ok(_cars);
+        lock (_lock)
+        {
+            return Ok(_cars.ToList());
+        }
     }
 
     // GET api/cars/{id}
     [HttpGet("{id}")]
     public ActionResult<Car> GetById(string id)
     {
-        var car = _cars.FirstOrDefault(c => c.Id == id);
-        if (car is null)
-            return NotFound(new { message = $"Car with id '{id}' was not found." });
+        lock (_lock)
+        {
+            var car = _cars.FirstOrDefault(c => c.Id == id);
+            if (car is null)
+                return NotFound(new { message = $"Car with id '{id}' was not found." });
 
-        return Ok(car);
+            return Ok(car);
+        }
     }
 
     // POST api/cars
@@ -35,7 +42,11 @@ public class CarsController : ControllerBase
             return BadRequest(ModelState);
 
         car.Id = Guid.NewGuid().ToString();
-        _cars.Add(car);
+
+        lock (_lock)
+        {
+            _cars.Add(car);
+        }
 
         return CreatedAtAction(nameof(GetById), new { id = car.Id }, car);
     }
@@ -47,25 +58,32 @@ public class CarsController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var existing = _cars.FirstOrDefault(c => c.Id == id);
-        if (existing is null)
-            return NotFound(new { message = $"Car with id '{id}' was not found." });
+        lock (_lock)
+        {
+            var existing = _cars.FirstOrDefault(c => c.Id == id);
+            if (existing is null)
+                return NotFound(new { message = $"Car with id '{id}' was not found." });
 
-        existing.Model = updated.Model;
-        existing.Year = updated.Year;
+            existing.Model = updated.Model;
+            existing.Year = updated.Year;
 
-        return Ok(existing);
+            return Ok(existing);
+        }
     }
 
     // DELETE api/cars/{id}
     [HttpDelete("{id}")]
     public ActionResult Delete(string id)
     {
-        var car = _cars.FirstOrDefault(c => c.Id == id);
-        if (car is null)
-            return NotFound(new { message = $"Car with id '{id}' was not found." });
+        lock (_lock)
+        {
+            var car = _cars.FirstOrDefault(c => c.Id == id);
+            if (car is null)
+                return NotFound(new { message = $"Car with id '{id}' was not found." });
 
-        _cars.Remove(car);
+            _cars.Remove(car);
+        }
+
         return NoContent();
     }
 }
